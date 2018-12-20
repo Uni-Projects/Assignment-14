@@ -2,7 +2,7 @@
 //Paolo Scattolin s1023775
 //Johan Urban s1024726
 
-#define NDEBUG
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -21,19 +21,19 @@ using namespace std;
 **********************************************************************/
 struct Length
 {
-	int minutes;							// #minutes (0..)
-	int seconds;							// #seconds (0..59)
+    int minutes;							// #minutes (0..)
+    int seconds;							// #seconds (0..59)
 };
 struct Track
 {
-	string artist;                          // artist name
-	string cd;                              // cd title
-	int    year;                            // year of appearance
-	int    track_no;						// track number
-	string title;                           // track title
-	string tags;                            // track tags (separated by ,)
-	Length time;							// track length
-	string country;                         // countr(y/ies) of artist (separated by ,)
+    string artist;                          // artist name
+    string cd;                              // cd title
+    int    year;                            // year of appearance
+    int    track_no;						// track number
+    string title;                           // track title
+    string tags;                            // track tags (separated by ,)
+    Length time;							// track length
+    string country;                         // countr(y/ies) of artist (separated by ,)
 };
 
 const int MAX_NO_OF_SONGS = 6000;
@@ -58,17 +58,17 @@ bool operator==(const Length& a, const Length& b)
 
 bool operator>(const Length& a, const Length& b)
 {
-	return b < a ;
+    return b < a ;
 }
 
 bool operator<=(const Length& a, const Length& b)
 {
-	return !(b < a) ;
+    return !(b < a) ;
 }
 
 bool operator>=(const Length& a, const Length& b)
 {
-	return b <= a ;
+    return b <= a ;
 }
 
 bool operator<(const Track& a, const Track& b)
@@ -82,12 +82,10 @@ bool operator<(const Track& a, const Track& b)
              {
                 return a.track_no < b.track_no;
              }else return a.year < b.year;
-
          }else return a.cd < b.cd;
-
    }else return a.artist < b.artist ;
    */
-   return a.time < b.time ;
+    return a.time < b.time ;
 }
 
 bool operator==(const Track& a, const Track& b)
@@ -98,17 +96,17 @@ bool operator==(const Track& a, const Track& b)
 
 bool operator>(const Track& a, const Track& b)
 {
-	return b < a ;
+    return b < a ;
 }
 
 bool operator<=(const Track& a, const Track& b)
 {
-	return !(b < a) ;
+    return !(b < a) ;
 }
 
 bool operator>=(const Track& a, const Track& b)
 {
-	return b <= a ;
+    return b <= a ;
 }
 
 /************************************************************************
@@ -132,10 +130,10 @@ ostream& operator<< (ostream& out, const Length length)
     length is sent to out as: minutes, ':', seconds (at least 2 digits)
 */
     out << length.minutes << ':';
-	if (length.seconds < 10)
-		out << '0';
-	out << length.seconds;
-	return out ;
+    if (length.seconds < 10)
+        out << '0';
+    out << length.seconds;
+    return out ;
 }
 
 void skip_to_next_newline (istream& infile)
@@ -212,7 +210,7 @@ int read_songs (ifstream& infile, vector <Track>& songs)
 
 int read_file (string filename)
 {// pre-condition:
-    assert (songs.size() == 0) ;
+    assert (filename.size() > 4) ;
 /*  post-condition:
     If the result is -1, then no file could be opened, and songs is unchanged.
     Otherwise, the result is zero or positive, and songs contains all the found tracks in the
@@ -225,10 +223,10 @@ int read_file (string filename)
         return -1;
     }
     cout << "Reading '" << filename << "'." << endl;
-	const int NO_OF_SONGS = read_songs (songsDBS, songs);
-	songsDBS.close();
-	cout << "Read " << NO_OF_SONGS << " tracks." << endl;
-	return NO_OF_SONGS;
+    const int NO_OF_SONGS = read_songs (songsDBS, songs);
+    songsDBS.close();
+    cout << "Read " << NO_OF_SONGS << " tracks." << endl;
+    return NO_OF_SONGS;
 }
 
 // NOTE: this version uses *array* implementation, convert to vector yourself
@@ -245,11 +243,18 @@ void show_all_tracks (vector <Track> songs, int no_of_songs)
 }
 
 /************************************************************************
-*   sorting functions:
+*   sorting functions: (actual assignment)
 ************************************************************************/
+
+/**********
+ * PART 1:
+ *********/
 
 void swap (vector <Track>& songs, int  pos1, int pos2)
 {
+    // PRE:
+    assert(pos1 >= 0 && pos1 < songs.size());
+    // POST: swaps the elements at the given indices.
     Track temp;
     temp = songs[pos1];
     songs[pos1] = songs [pos2];
@@ -258,122 +263,259 @@ void swap (vector <Track>& songs, int  pos1, int pos2)
 
 void dnf (vector<Track>& songs, int first, int last, int& red, int& blue)
 {
+    // PRE:
+    assert(songs.size() > 0);
+    // POST: applies the dutch national flag division to the vector.
     red = first-1;         // index last red
     blue = last+1;         // index first blue
     int white = last+1;    // index first white
-    const Track PIVOT = songs [first+(last-first)/2];
+    const Track PIVOT = songs [first+(last-first) / 2];
     while (red < white - 1) // orange not empty
     {
-         const int NEXT = white - 1; // last orange
-         if (songs[NEXT] < PIVOT) // belongs in red
-         {
-              red++; // swap with first orange
-              swap (songs, red, NEXT) ;
-         }
-         else if (songs[NEXT] == PIVOT) // belongs in white
-               white-- ; // white area one larger
-         else // belongs in blue
-         {
-              white--;
-              blue--; // swap with last white
-              swap (songs, NEXT, blue);
-         }
-     }
+        const int NEXT = white - 1; // last orange
+        if (songs[NEXT] < PIVOT) // belongs in red
+        {
+            red++; // swap with first orange
+            swap (songs, red, NEXT) ;
+        }
+        else if (songs[NEXT] == PIVOT) // belongs in white
+            white-- ; // white area one larger
+        else // belongs in blue
+        {
+            white--;
+            blue--; // swap with last white
+            swap (songs, NEXT, blue);
+        }
+    }
 }
 
+void quicksort (vector<Track>& songs, int first, int last)
+{
+    // PRE:
+    assert (0 <= first && last <= songs.size()) ;
+    // POST: songs[first] ... songs[last] is sorted
+    if (first >= last)
+        return;
+    else
+    {
+        int red, blue ;
+        dnf(songs, first, last, red, blue) ;
+        quicksort (songs, first, red) ;
+        quicksort (songs, blue, last) ;
+    }
+}
+
+/**********
+ * PART 2
+ *********/
 void special_dnf (vector<Track>& songs, int first, int last, int& red, int& blue)
 {
+    // PRE:
+    assert(songs.size() >= 0);
+    // POST: applies the alternative dutch national flag division of the vector,
+    // with the colors white and orange inverted.
     red = first - 1;                     // index last red
     blue = last + 1;                     // index first blue
     int white = first - 1;               // index last white
     const Track PIVOT = songs [first+(last-first)/2];
     while (white < blue - 1)             // orange not empty
     {
-         const int NEXT = blue - 1;      // last orange
-         if (songs[NEXT] < PIVOT)        // belongs in red
-         {
-              red++;                     //adjust last red
-              white++;                   //adjust last white
-              swap(songs, red, NEXT);    // swap with first orange
-         }
-         else if (songs[NEXT] == PIVOT)  // belongs in white
-         {
-             white++;                    // adjust last white
-             swap(songs, NEXT, white);   // swap last orange with first orange
-         }
+        const int NEXT = blue - 1;      // last orange
+        if (songs[NEXT] < PIVOT)        // belongs in red
+        {
+            red++;                     //adjust last red
+            white++;                   //adjust last white
+            swap(songs, red, NEXT);    // swap with first orange
+        }
+        else if (songs[NEXT] == PIVOT)  // belongs in white
+        {
+            white++;                    // adjust last white
+            swap(songs, NEXT, white);   // swap last orange with first orange
+        }
 
-         else                            // belongs in blue
-         {
-              blue--;                    // adjust first blue
-              swap (songs, NEXT, blue);  // swap first blue with last orange
-         }
-     }
-}
-
-void quicksort (vector<Track>& songs, int first, int last)
-{
-   // PRE:
-   assert (0 <= first && last < size (songs)) ;
-   // POST: songs[first] ... songs[last] is sorted
-   if (first >= last)
-      return;
-   else
-    {
-      int red, blue ;
-      dnf(songs, first, last, red, blue) ;
-      quicksort (songs, first, red) ;
-      quicksort (songs, blue, last) ;
+        else                            // belongs in blue
+        {
+            blue--;                    // adjust first blue
+            swap (songs, NEXT, blue);  // swap first blue with last orange
+        }
     }
 }
 
+
 void special_quicksort (vector<Track>& songs, int first, int last)
 {
-   // PRE:
-   assert (0 <= first && last < size (songs)) ;
-   // POST: songs[first] ... songs[last] is sorted
-   if (first >= last)
-      return;
-   else
+    // PRE:
+    assert (0 <= first && last < songs.size()) ;
+    // POST: songs[first] ... songs[last] is sorted
+    if (first >= last)
+        return;
+    else
     {
-      int red, blue ;
-      special_dnf(songs, first, last, red, blue) ;
-      quicksort (songs, first, red) ;
-      quicksort (songs, blue, last) ;
+        int red, blue ;
+        special_dnf(songs, first, last, red, blue) ;
+        special_quicksort (songs, first, red) ;
+        special_quicksort (songs, blue, last) ;
+    }
+}
+
+/****************************************************************
+ * PART 3: translating recursive algorithm to an iterative one
+ ***************************************************************/
+typedef int El;
+
+void swap_p3 (vector <El>& v, int  pos1, int pos2)
+{
+    // PRE:
+    assert(pos1 >= 0 && pos1 <= pos2);
+    assert(pos2 > 0 && pos2 < v.size());
+    // POST: swaps the elements from pos1 and pos2 with each other.
+    El temp;
+    temp = v[pos1];
+    v[pos1] = v[pos2];
+    v[pos2] = temp;
+}
+
+
+int largest(vector<El>&v, int low, int up)
+{
+    // PRE:
+    assert(low >= 0 && low < v.size());
+    assert(low <= up);
+    // POST: returns the index of the highest value of considered elements.
+    int pos = low;
+
+    int i = low;
+    while(i < up)
+    {
+        if (v[pos] < v[i])
+            pos = i;
+        i++;
+    }
+    return pos;
+}
+
+void sort(vector<El>& v, int n)
+{
+    // PRE:
+    assert(v.size() > 0);
+    assert(n == v.size());
+    // POST: sorts a vector iteratively based on its values using functions largest() and swap().
+    while(n > 1)
+    {
+        const int POS = largest(v, 0, n) ;
+        swap_p3 (v, POS, n-1) ;
+        n--;
     }
 }
 
 /************************************************************************
 *   the main structure of the program:
 *       - read file
-*       - sort data with insertion_sort / selection_sort / bubble_sort
-*              and 'normal' order of Tracks
+*       - sort data with quicksort / "sort"
+*              'normal' order of Tracks
 *              and increasing track length
 ************************************************************************/
 
-int main()
+void quickdnf(int num_songs)
 {
+    // PRE:
+    assert(num_songs > 0);
+    // POST: calls the functions necessary to apply dnf quicksort and output the result.
     int first = 0;
-
-	const int NO_OF_SONGS = read_file ("test.txt");
-
-	if (NO_OF_SONGS < 0)
-	{
-        cout << "Reading file failed. Program terminates." << endl;
-	    return NO_OF_SONGS;
-    }
-    int last = NO_OF_SONGS - 1;
+    int last = num_songs - 1;
 
     quicksort(songs,first,last);
-    show_all_tracks(songs,NO_OF_SONGS);
-    /*
-     Now the algorithm are going to sort the track list by time.
-     If you want to sort by track number in the album, just comment the .time part
-     in these 2 functions and de-comment the rest.
+    show_all_tracks(songs,num_songs);
 
-     bool operator<(const Track& a, const Track& b)
-
-     bool operator==(const Track& a, const Track& b)
-    */
-
-	return 0;
 }
+
+void quickdnf_alt(int num_songs)
+{
+    // PRE:
+    assert(num_songs > 0);
+    // POST: calls the functions necessary to apply alternative dnf quicksort and output the result.
+    int first = 0;
+    int last = num_songs - 1;
+
+    special_quicksort(songs, first, last);
+    show_all_tracks(songs, num_songs);
+}
+
+void iterative_sort()
+{
+    // PRE:
+    assert(true);
+    // POST: calls the function necessary to apply sorting algorithm.
+    vector <El> v = {   68, 35, 53, 59, 45, 77, 72, 51, 58, 28, 82, 83, 90, 80, 43, 81, 55, 73, 20,
+                        11, 3, 2, 16, 67, 88, 87, 23, 84, 86, 30, 25, 18, 37,  69, 21, 24, 89,  5, 31,
+                        46, 19, 48, 29, 65, 32, 37, 74, 7, 63,17, 70, 47, 33, 27, 13, 10, 75, 36,
+                        85, 38, 57, 42, 9, 76, 26, 6,78, 61, 79, 50, 15, 4, 34, 54, 40, 22, 56,
+                        12, 49, 39, 64, 1, 66, 71, 44, 60, 41, 8, 62, 14, 52
+                    };
+
+    sort(v,v.size());
+
+    // PRINTING OF THE VECTOR
+    for (int i = 0 ; i < v.size(); i++)
+        cout << v[i] << " ";
+}
+
+
+int main()
+{
+    bool run = true;
+
+    const int NO_OF_SONGS = read_file ("Tracks.txt");
+
+    if (NO_OF_SONGS < 0)
+    {
+        cout << "Reading file failed." << endl;
+    }
+
+    while(run == true)
+    {
+        int input;
+        /*
+        Now the algorithm are going to sort the track list by time.
+        If you want to sort by track number in the album, just comment the .time part
+        in these 2 functions and de-comment the rest.
+        bool operator<(const Track& a, const Track& b)
+        bool operator==(const Track& a, const Track& b)
+        */
+        cout << endl;
+        cout << "Which part of the assignment would you like to execute?" << endl;
+        cout << "1: PART 1 - standard DNF quicksort" << endl;
+        cout << "2: PART 2 - alternative DNF quicksort" << endl;
+        cout << "3: PART 3 - iterative sorting algorithm" << endl;
+        cout << "4: Exit" << endl;
+
+        cin >> input;
+
+        cout << endl;
+
+        switch (input) {
+            case 1 :
+                quickdnf(NO_OF_SONGS);
+                break;
+            case 2:
+                quickdnf_alt(NO_OF_SONGS);
+                break;
+            case 3:
+                iterative_sort();
+                break;
+            case 4 :
+                cout << endl;
+                cout << "Exiting..." << endl;
+                run = false;
+                break;
+            default :
+                cout << "Input not accepted!" << endl;
+                break;
+        }
+        cout << endl;
+    }
+
+    return 0;
+}
+
+
